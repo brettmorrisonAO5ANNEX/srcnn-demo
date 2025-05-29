@@ -11,6 +11,7 @@ from tqdm import tqdm
 import tensorflow as tf
 from keras import models, layers
 import shutil
+from PIL import Image
 
 # Helpers
 def create_dataset(size, train_count, val_count, train_progress=None, val_progress=None, log_callback=None):
@@ -436,18 +437,30 @@ if st.sidebar.button("Train Model"):
             st.warning("Please generate dataset first")
 
 img_file = st.sidebar.file_uploader("Upload Custom Test Image", type=["jpg", "jpeg", "png"])
-realtime_update = st.sidebar.checkbox(label="Update in Real Time", value=True)
-box_color = st.sidebar.color_picker(label="Box Color", value='#0000FF')
 if img_file:
-    img = cv2.imread(img_file, cv2.IMREAD_COLOR)
-    if not realtime_update:
-        st.write("Double click to save crop")
-    # Get a cropped image from the frontend
-    cropped_img = st_cropper(img, realtime_update=realtime_update, box_color=box_color,
-                                aspect_ratio=(1, 1))
-    
-    # Manipulate cropped image at will
-    st.session_state.uploaded_img = cropped_img
+    # Convert uploaded file to OpenCV image
+    file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
+    img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB for display
+
+    # Convert to PIL for cropping
+    pil_img = Image.fromarray(img_rgb)
+
+    # Use st_cropper
+    st.subheader("Select Crop Region")
+    cropped_img = st_cropper(
+        pil_img,
+        realtime_update=True,
+        box_color="#0DFF00",
+        aspect_ratio=(1, 1)
+    )
+
+    # Show cropped image
+    st.subheader("Cropped Image")
+    st.image(cropped_img, use_container_width=True)
+
+    # Optionally save it in session
+    st.session_state.uploaded_img = np.array(cropped_img)
 
 if st.sidebar.button("Test Model"):
     with output_log:
