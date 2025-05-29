@@ -6,5 +6,5 @@ opencv-python-headless
 tqdm
 requests
 streamlit
-streamlit-cropper
+streamlit-image-coordinates
 pillow

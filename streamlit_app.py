@@ -1,5 +1,6 @@
 import streamlit as st
-from streamlit_cropper import st_cropper
+from PIL import Image
+from streamlit_image_coordinates import streamlit_image_coordinates
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,7 +12,6 @@ from tqdm import tqdm
 import tensorflow as tf
 from keras import models, layers
 import shutil
-from PIL import Image
 
 # Helpers
 def create_dataset(size, train_count, val_count, train_progress=None, val_progress=None, log_callback=None):
@@ -195,6 +195,9 @@ st.markdown("""<style>
 # Parameters Sidebar
 st.sidebar.image("logo.png", use_container_width=True)
 img_size = st.sidebar.number_input("Training Image Size", min_value=64, max_value=512, value=256, step=32)
+CROP_SIZE = img_size
+HALF_CROP = CROP_SIZE // 2
+DISPLAY_WIDTH = 400
 train_count = st.sidebar.number_input("Num Training Samples", min_value=1, value=80, step=10)
 val_count = st.sidebar.number_input("Num Validation Samples", min_value=1, value=20, step=10)
 epochs = st.sidebar.slider("Epochs", min_value=1, max_value=50, value=10)
@@ -438,29 +441,41 @@ if st.sidebar.button("Train Model"):
 
 img_file = st.sidebar.file_uploader("Upload Custom Test Image", type=["jpg", "jpeg", "png"])
 if img_file:
-    # Convert uploaded file to OpenCV image
-    file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
-    img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB for display
+    original_img = Image.open(img_file).convert("RGB")
 
-    # Convert to PIL for cropping
-    pil_img = Image.fromarray(img_rgb)
+    # Resize for display only
+    aspect_ratio = original_img.height / original_img.width
+    display_img = original_img.resize((DISPLAY_WIDTH, int(DISPLAY_WIDTH * aspect_ratio)))
 
-    # Use st_cropper
-    st.subheader("Select Crop Region")
-    cropped_img = st_cropper(
-        pil_img,
-        realtime_update=True,
-        box_color="#0DFF00",
-        aspect_ratio=(1, 1)
-    )
+    # Show resized image and get coordinates
+    with st.sidebar:
+        st.info("Click on the image to select the center point for cropping.")
+        coords = streamlit_image_coordinates(display_img)
 
-    # Show cropped image
-    st.subheader("Cropped Image")
-    st.image(cropped_img, use_container_width=True)
+    if coords:
+        # Scale coordinates back to original resolution
+        scale_x = original_img.width / display_img.width
+        scale_y = original_img.height / display_img.height
 
-    # Optionally save it in session
-    st.session_state.uploaded_img = np.array(cropped_img)
+        x_center = int(coords["x"] * scale_x)
+        y_center = int(coords["y"] * scale_y)
+
+        # Calculate top-left corner
+        x0 = max(0, x_center - HALF_CROP)
+        y0 = max(0, y_center - HALF_CROP)
+
+        # Clip to image bounds
+        x0 = min(x0, original_img.width - CROP_SIZE)
+        y0 = min(y0, original_img.height - CROP_SIZE)
+
+        crop_box = (x0, y0, x0 + CROP_SIZE, y0 + CROP_SIZE)
+        cropped_img = original_img.crop(crop_box)
+        cropped_array = np.array(cropped_img)
+        cropped_cv = cv2.cvtColor(cropped_array, cv2.COLOR_RGB2BGR)
+
+        st.sidebar.info(f"Cropped Image ({img_size}x{img_size})")
+        st.sidebar.image(cropped_img, use_container_width=True)
+        st.session_state.uploaded_img = cropped_cv
 
 if st.sidebar.button("Test Model"):
     with output_log:
