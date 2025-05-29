@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_cropper import st_cropper
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -434,17 +435,19 @@ if st.sidebar.button("Train Model"):
         else:
             st.warning("Please generate dataset first")
 
-if st.sidebar.file_uploader("Upload Custom Test Image", type=["jpg", "jpeg", "png"]):
-    uploaded_file = st.sidebar.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
-    if uploaded_file is not None:
-        try:
-            # Read the image file
-            img = cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), cv2.IMREAD_COLOR)
-            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            st.session_state.uploaded_img = img_rgb
-            st.image(img_rgb, caption="Uploaded Image", use_container_width=True)
-        except Exception as e:
-            st.error(f"Error reading image: {e}")
+img_file = st.sidebar.file_uploader("Upload Custom Test Image", type=["jpg", "jpeg", "png"])
+realtime_update = st.sidebar.checkbox(label="Update in Real Time", value=True)
+box_color = st.sidebar.color_picker(label="Box Color", value='#0000FF')
+if img_file:
+    img = cv2.imread(img_file, cv2.IMREAD_COLOR)
+    if not realtime_update:
+        st.write("Double click to save crop")
+    # Get a cropped image from the frontend
+    cropped_img = st_cropper(img, realtime_update=realtime_update, box_color=box_color,
+                                aspect_ratio=(1, 1))
+    
+    # Manipulate cropped image at will
+    st.session_state.uploaded_img = cropped_img
 
 if st.sidebar.button("Test Model"):
     with output_log:
