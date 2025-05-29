@@ -12,34 +12,10 @@ from tqdm import tqdm
 import tensorflow as tf
 from keras import models, layers
 import shutil
-import uuid
-import time
-
-if "session_id" not in st.session_state:
-    st.session_state.session_id = str(uuid.uuid4())
-dataset_dir = Path(f"dataset_{st.session_state.session_id}")
-
-# Set/update last active time
-st.session_state.last_active = time.time()
-SESSION_TIMEOUT = 1000
-
-def cleanup_old_sessions():
-    base_path = Path(".")
-    for path in base_path.glob("dataset_*"):
-        # Check if session has a timestamp file
-        timestamp_file = path / "last_active.txt"
-        if timestamp_file.exists():
-            last_active = float(timestamp_file.read_text())
-            if time.time() - last_active > SESSION_TIMEOUT:
-                shutil.rmtree(path)
-
-def update_last_active():
-    timestamp_file = dataset_dir / "last_active.txt"
-    timestamp_file.write_text(str(time.time())) 
 
 # Helpers
 def create_dataset(size, train_count, val_count, train_progress=None, val_progress=None, log_callback=None):
-    dataset_dir = dataset_dir
+    dataset_dir = Path("dataset")
     dataset_dir.mkdir(exist_ok=True)
 
     # Train dirs
@@ -133,7 +109,7 @@ def get_dataset(lr_dir, hr_dir, batch_size=8, shuffle=True):
     return dataset
 
 def clear_dataset():
-    dataset_dir = dataset_dir
+    dataset_dir = Path("dataset")
     if dataset_dir.exists():
         shutil.rmtree(dataset_dir)
 
@@ -316,7 +292,7 @@ with tab4:
     dataset_type = st.selectbox("Select Dataset", ["train", "val"])
     resolution_type = st.selectbox("Select Resolution", ["HR", "LR"])
 
-    folder_path = dataset_dir / dataset_type / resolution_type
+    folder_path = Path("dataset") / dataset_type / resolution_type
 
     if not folder_path.exists():
         st.warning("No dataset has been generated, please generate the dataset before previewing")
@@ -409,20 +385,8 @@ if st.sidebar.button("Train Model"):
 
             st.write("\>> Preparing datasets")
             try:
-                hr_train_dir = dataset_dir / "train" / "HR"
-                lr_train_dir = dataset_dir / "train" / "LR"
-                hr_val_dir   = dataset_dir / "val" / "HR"
-                lr_val_dir   = dataset_dir / "val" / "LR"
-
-                # Create directories
-                hr_train_dir.mkdir(parents=True, exist_ok=True)
-                lr_train_dir.mkdir(parents=True, exist_ok=True)
-                hr_val_dir.mkdir(parents=True, exist_ok=True)
-                lr_val_dir.mkdir(parents=True, exist_ok=True)
-
-                ds_train = get_dataset(str(lr_train_dir), str(hr_train_dir), batch_size=batch_size)
-                ds_val = get_dataset(str(lr_val_dir), str(hr_val_dir), batch_size=batch_size)
-
+                ds_train = get_dataset("dataset/train/LR", "dataset/train/HR", batch_size=batch_size)
+                ds_val = get_dataset("dataset/val/LR", "dataset/val/HR", batch_size=batch_size)
                 st.session_state.ds_train = ds_train
                 st.session_state.ds_val = ds_val
                 st.session_state.img_size = img_size
@@ -542,8 +506,3 @@ if st.sidebar.button("Test Model"):
                 st.error(f"Error during model test: {e}")
         else:
             st.warning("Please train model first")
-
-# Update last active time on every interaction
-update_last_active()
-# Cleanup old sessions on app start
-cleanup_old_sessions()
