@@ -1,4 +1,4 @@
-![logo](https://github.com/user-attachments/assets/0b89f9c4-b257-45ba-b9d1-7c5c62404dd1)
+<img src="https://github.com/user-attachments/assets/5d14b423-288b-4b48-9dd1-1d5d838e8d96" width="400"/>
 
 ## Try the demo here:
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://srcnn-demo.streamlit.app/)
