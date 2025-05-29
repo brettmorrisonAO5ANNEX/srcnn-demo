@@ -380,8 +380,8 @@ if st.sidebar.button("Train Model"):
 
             st.write("\>> Preparing datasets")
             try:
-                ds_train = get_dataset("../dataset/train/LR", "../dataset/train/HR", batch_size=batch_size)
-                ds_val = get_dataset("../dataset/val/LR", "../dataset/val/HR", batch_size=batch_size)
+                ds_train = get_dataset("dataset/train/LR", "dataset/train/HR", batch_size=batch_size)
+                ds_val = get_dataset("dataset/val/LR", "dataset/val/HR", batch_size=batch_size)
                 st.session_state.ds_train = ds_train
                 st.session_state.ds_val = ds_val
                 st.session_state.img_size = img_size
@@ -415,7 +415,7 @@ if st.sidebar.button("Train Model"):
                             st.write(f"Training accuracy: {train_acc:.4f}")
                             st.write(f"Validation accuracy: {val_acc:.4f}")
                         else:
-                            st.write("AAccuracy metrics not available in history")
+                            st.write("Accuracy metrics not available in history")
 
                 st.session_state.train_loss = train_loss_history
                 st.session_state.val_loss = val_loss_history
@@ -454,7 +454,7 @@ if st.sidebar.button("Test Model"):
                 if "uploaded_img" in st.session_state:
                     test_image = st.session_state.uploaded_img
                 else: 
-                    test_image = cv2.imread("../assets/willy.JPG", cv2.IMREAD_COLOR)
+                    test_image = cv2.imread("willy.JPG", cv2.IMREAD_COLOR)
 
                 hr_test, lr_test, sr_test = run_test(
                     test_image, 
