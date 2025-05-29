@@ -1,25 +1,7 @@
-# 📦 Streamlit App Starter Kit 
-```
-⬆️ (Replace above with your app's name)
-```
-
-Description of the app ...
-
-## Demo App
-
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://app-starter-kit.streamlit.app/)
-
-## GitHub Codespaces
-
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/app-starter-kit?quickstart=1)
-
-## Section Heading
-
-This is filler text, please replace this with text for this section.
-
-## Further Reading
-
-This is filler text, please replace this with a explanatory text about further relevant resources for this repo
-- Resource 1
-- Resource 2
-- Resource 3
+# SRCNN Implementation
+Image super resolution (SR) using a convolutional neural network approach. The code is based on the theory provided in the following paper: 
+- https://arxiv.org/abs/1501.00092
+  
+This is a follow-up to some videos I made, which are a review of the above paper and are available via the links below if you're interested!
+- https://youtu.be/mkUhGvbmhSI?si=Eejr5e3-LkxOJTKR (part 1)
+- https://youtu.be/qZcBXYQLLyQ?si=qf1QmnjlVocCMkcL (part 2)
