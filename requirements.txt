@@ -1,1 +1,8 @@
-streamlit>=1.26.0
+numpy
+matplotlib
+tensorflow==2.13.0
+tensorflow-datasets
+opencv-python-headless
+tqdm
+requests
+streamlit
