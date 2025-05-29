@@ -287,7 +287,7 @@ with tab4:
     dataset_type = st.selectbox("Select Dataset", ["train", "val"])
     resolution_type = st.selectbox("Select Resolution", ["HR", "LR"])
 
-    folder_path = Path("../dataset") / dataset_type / resolution_type
+    folder_path = Path("dataset") / dataset_type / resolution_type
 
     if not folder_path.exists():
         st.warning("No dataset has been generated, please generate the dataset before previewing")
